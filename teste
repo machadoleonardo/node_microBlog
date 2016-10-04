@@ -1,0 +1,66 @@
+public void preencherPassoAmbientesCadastroPropostaUbsConstrucaoEAvancar(WebDriver driver) {
+		Functions.clicarButton(UIComponentsId.AVANCAR_BUTTON, driver);
+	}
+
+	public void preencherPassoEmendasCadastroPropostaUbsConstrucaoEAvancar(WebDriver driver) {
+		Functions.clicarButton(UIComponentsId.PROPOSTA_EMENDA_DADOS_LAYOUT, driver);
+		Functions.clicarButton(UIComponentsId.CONFIRMAR_BUTTON, driver);
+		Functions.clicarButton(UIComponentsId.AVANCAR_BUTTON, driver);
+	}
+
+	public void enviarProposta(WebDriver driver) {
+		Functions.clicarButton(UIComponentsId.PROPOSTAS_BUTTON, driver);
+		Functions.clicarBotãoDaProposta(this.model.getNumeroProvisorio(), UIComponentsId.VISUALIZAR_ICON, driver);
+		Functions.clicarButton(UIComponentsId.ENVIAR_BUTTON, driver);
+		Functions.clicarButton(UIComponentsId.MODAL_ENVIAR_PROPOSTA_BUTTON, driver);
+		this.pegarNumeroPropostaAlerta(driver);
+	}
+
+	public void pegarNumeroProvisorioCabecalho(WebDriver driver) {
+		String numeroProvisorio = driver.findElement(By.id(UIComponentsId.CABECALHO_PROPOSTA_NUMERO_PROPOSTA)).getText();
+		SmokeTestModel.getInstance().setNumeroProvisorio(numeroProvisorio);
+	}
+
+	public void pegarNumeroPropostaAlerta(WebDriver driver) {
+
+		Functions.clicarMenu(0, driver);
+		WebElement menu = driver.findElement(By.id(UIComponentsId.MENU_POPUP_HEADER_MENUPERFIL_BUTTON));
+		if (menu != null) {
+			List<WebElement> listAlertas = menu.findElements(By.className("v-menubar-menuitem-alerta"));
+			if (listAlertas.size() > 0) {
+				String numeroDefinitivo = listAlertas.get(0).findElement(By.className("v-menubar-menuitem-caption")).getText().substring(0, 20);
+				SmokeTestModel.getInstance().setNumeroDefinitivo(numeroDefinitivo);
+			}
+		}
+	}
+
+	public void emitirParecerParaAdequacao(String login, String numeroProposta, WebDriver driver) {
+		Functions.sair(driver);
+		Functions.logar(login, SismobLoginData.SENHA_USUARIO, driver);
+		Functions.clicarButton(UIComponentsId.PROPOSTASEOBRAS_BUTTON, driver);
+		Functions.clicarBotaoDaPropostaParecerista(numeroProposta, UIComponentsId.VISUALIZAR_ICON, driver);
+		List<WebElement> adequacaoButtons = driver.findElements(By.id("PARA ADEQUACAO_LABEL"));
+		for (WebElement adequacaoButton : adequacaoButtons) {
+			adequacaoButton.click();
+		}
+		Functions.clicarButton(UIComponentsId.AVANCAR_BUTTON, driver);
+		try {
+			Functions.clicarButton(UIComponentsId.PARA_ADEQUACAO_ICON, driver);
+		} catch (NoSuchElementException e) {
+			for (WebElement adequacaoButton : adequacaoButtons) {
+				adequacaoButton.click();
+			}
+			Functions.clicarButton(UIComponentsId.AVANCAR_BUTTON, driver);
+			Functions.clicarButton(UIComponentsId.PARA_ADEQUACAO_ICON, driver);
+		}
+		this.selecionarTodasDiligencias(driver);
+		Functions.clicarButton(UIComponentsId.FINALIZAR_BUTTON, driver);
+		Functions.clicarButton(UIComponentsId.MODAL_CONFIRMAR_EMISSAO_PARECER_BUTTON, driver);
+	}
+
+	private void selecionarTodasDiligencias(WebDriver driver) {
+		List<WebElement> listDiligencias = driver.findElements(By.className("v-checkbox"));
+		for (WebElement element : listDiligencias) {
+			element.click();
+		}
+	}
